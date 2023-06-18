@@ -1,7 +1,5 @@
 # H-Bar
 
-![icon-hydrogen](./images/icon-hydrogen.png)
-
 H-Bar means *Hydrogen-Bar*. It is a VSCode extension to show system HW/SW stats in VSCode status bar.
 
 ## Features
