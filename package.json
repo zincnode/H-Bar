@@ -12,6 +12,9 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "icon": "images/icon-hydrogen.png",
+  "repository": "git@github.com:zincnode/H-Bar.git",
+  "publisher": "zincnode",
   "main": "./out/extension.js",
   "contributes": {},
   "scripts": {
