@@ -1,5 +1,15 @@
 import * as vscode from 'vscode';
 import systeminfo = require('systeminformation');
+import * as os from 'os';
+
+export const platform = os.platform();
+export const isWin32 = platform === 'win32';
+
+export function systeminfoInit() {
+	if (isWin32) {
+		systeminfo.powerShellStart();
+	}
+}
 
 let cpuItem: vscode.StatusBarItem;
 let memItem: vscode.StatusBarItem;
@@ -13,12 +23,17 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	dockerItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -130);
 	subscriptions.push(cpuItem, memItem, uptimeItem, dockerItem);
 
-	setInterval(getCPUUsage, 500);
-	setInterval(getMemoryUsage, 500);
-	setInterval(getUptime, 500);
-	setInterval(getDockerUsage, 500);
-	setInterval(getCPUInfo, 500);
-	setInterval(getDockerInfo, 500);
+	setInterval(allUpdate, 500);
+}
+
+async function allUpdate(): Promise<void>{
+	systeminfoInit();
+	getCPUUsage();
+	getMemoryUsage();
+	getUptime();
+	getDockerUsage();
+	getCPUInfo();
+	getDockerInfo();
 }
 
 
