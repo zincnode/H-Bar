@@ -2,7 +2,7 @@
   "name": "h-bar",
   "displayName": "H-Bar",
   "description": "A status bar to show system HW/SW stats",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.79.0"
   },
