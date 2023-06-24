@@ -9,6 +9,15 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "system status",
+    "status bar",
+    "cpu load",
+    "memory usage",
+    "uptime",
+    "docker",
+    "monitor"
+  ],
   "activationEvents": [
     "onStartupFinished"
   ],
