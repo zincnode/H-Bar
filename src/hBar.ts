@@ -13,15 +13,10 @@ class HBar {
     }
 
     init() {
-        this.hBarItems.set('cpu', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
-        this.hBarItems.set('mem', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
-        this.hBarItems.set('gpu', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
-        this.hBarItems.set('uptime', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
-        this.hBarItems.set('user', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
-        this.hBarItems.set('docker', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
-        this.hBarItems.set('net', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
-        this.hBarItems.forEach((item) => {  
-            item.show();
+        const modules = ['cpu', 'mem', 'gpu', 'uptime', 'user', 'docker', 'net'];
+        modules.forEach((module) => {
+            this.hBarItems.set(module, vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
+            this.hBarItems.get(module)!.show();
         });
         this._context.subscriptions.push(...this.hBarItems.values());
     }
@@ -179,8 +174,10 @@ class HBar {
         gpuTooltip.appendMarkdown(`| Vendor | Model | VRAM |\n`);
         gpuTooltip.appendMarkdown(`| :--- | :--- | :--- |\n`);
         gpuData.controllers.forEach((gpu) => {
+            const vendor = gpu.vendor === '' ? 'N/A' : gpu.vendor;
+            const model = gpu.model === '' ? 'N/A' : gpu.model;
             const vram = gpu.vram === null ? 'N/A' : (gpu.vram / 1024).toFixed(2) + 'GB';
-            gpuTooltip.appendMarkdown(`| ${gpu.vendor} | ${gpu.model} | ${vram} |\n`);
+            gpuTooltip.appendMarkdown(`| ${vendor} | ${model} | ${vram} |\n`);
         });
         this.hBarItems.get('gpu')!.text = `$(server) ${gpuData.controllers.length} GPUs`;
         this.hBarItems.get('gpu')!.tooltip = gpuTooltip;
