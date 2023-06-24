@@ -19,17 +19,20 @@ class HBar {
         this.hBarItems.set('user', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
         this.hBarItems.set('docker', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
         this.hBarItems.set('net', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
+        this.hBarItems.forEach((item) => {  
+            item.show();
+        });
         this._context.subscriptions.push(...this.hBarItems.values());
     }
 
     async update() {
         setInterval(async () => {
-            await this.cpuItem();
-            await this.memItem();
-            await this.uptimeItem();
-            await this.userItem();
-            await this.dockerItem();
-            await this.netSpeedItem();
+            this.cpuItem();
+            this.memItem();
+            this.uptimeItem();
+            this.userItem();
+            this.dockerItem();
+            this.netSpeedItem();
         }, 500);
     }
 
@@ -38,7 +41,6 @@ class HBar {
         const cpuRes = await systeminfo.cpu();
         this.hBarItems.get('cpu')!.text = `$(dashboard) ${currentLoadRes.currentLoad.toFixed(2)}%`;
         this.hBarItems.get('cpu')!.tooltip = `CPU: ${cpuRes.manufacturer} ${cpuRes.brand} ${cpuRes.speed}GHz ${cpuRes.physicalCores}C${cpuRes.cores}T`;
-        this.hBarItems.get('cpu')!.show();
     }
 
     async memItem(): Promise<void> {
@@ -47,7 +49,6 @@ class HBar {
         const usedMem = memData.active / 1024 / 1024 / 1024;
         this.hBarItems.get('mem')!.text = `$(pulse) ${usedMem.toFixed(2)}/${totalMem.toFixed(2)}GB`;
         this.hBarItems.get('mem')!.tooltip = `Memory`;
-        this.hBarItems.get('mem')!.show();
     }
 
     async uptimeItem(): Promise<void> {
@@ -59,7 +60,6 @@ class HBar {
         const seconds = Math.floor(((uptime % 86400) % 3600) % 60).toString().padStart(2, '0');
         this.hBarItems.get('uptime')!.text = `$(heart) ${days}:${hours}:${minutes}:${seconds}`;
         this.hBarItems.get('uptime')!.tooltip = `Uptime`;
-        this.hBarItems.get('uptime')!.show();
     }
     
     async dockerItem(): Promise<void> {
@@ -101,7 +101,6 @@ class HBar {
 
         this.hBarItems.get('docker')!.text = `$(package) ${dockerContainers.length} containers`;
         this.hBarItems.get('docker')!.tooltip = dockerTooltip;
-        this.hBarItems.get('docker')!.show();
     }
 
     async userItem(): Promise<void> {
@@ -133,7 +132,6 @@ class HBar {
         userTooltip.appendMarkdown(`| ${lastUser} | ${users[users.length - 1].tty} | ${users[users.length - 1].ip} | ${userCount} |\n`);
         this.hBarItems.get('user')!.text = `$(account) ${users.length} users`;
         this.hBarItems.get('user')!.tooltip = userTooltip;
-        this.hBarItems.get('user')!.show();
     }
 
     async netSpeedItem(): Promise<void> {
@@ -160,7 +158,6 @@ class HBar {
         }
         this.hBarItems.get('net')!.text = `$(cloud-upload) ${utils.formatBytes(upSpeed)}/s  $(cloud-download) ${utils.formatBytes(downSpeed)}/s`;
         this.hBarItems.get('net')!.tooltip = netTooltip;
-        this.hBarItems.get('net')!.show();
     }
 }
 
