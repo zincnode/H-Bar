@@ -37,69 +37,75 @@ class HBar {
     }
 
     async cpuItem(): Promise<void> {
-        const currentLoadRes = await systeminfo.currentLoad();
-        const cpuRes = await systeminfo.cpu();
-        this.hBarItems.get('cpu')!.text = `$(dashboard) ${currentLoadRes.currentLoad.toFixed(2)}%`;
-        this.hBarItems.get('cpu')!.tooltip = `CPU: ${cpuRes.manufacturer} ${cpuRes.brand} ${cpuRes.speed}GHz ${cpuRes.physicalCores}C${cpuRes.cores}T`;
+        const currentLoadData = await systeminfo.currentLoad();
+        const cpuData = await systeminfo.cpu();
+        let cpuTooltip = new vscode.MarkdownString();
+        cpuTooltip.appendMarkdown(`# CPU Info\n`);
+        cpuTooltip.appendMarkdown(`- CPU: ${cpuData.manufacturer} ${cpuData.brand} ${cpuData.speed}GHz ${cpuData.physicalCores} Physical Cores ${cpuData.cores} Cores\n`);
+        this.hBarItems.get('cpu')!.text = `$(dashboard) ${currentLoadData.currentLoad.toFixed(2)}%`;
+        this.hBarItems.get('cpu')!.tooltip = cpuTooltip;
     }
 
     async memItem(): Promise<void> {
         const memData = await systeminfo.mem();
+        let memTooltip = new vscode.MarkdownString();
         const totalMem = memData.total / 1024 / 1024 / 1024;
         const usedMem = memData.active / 1024 / 1024 / 1024;
+        memTooltip.appendMarkdown(`# Memory Info\n`);
         this.hBarItems.get('mem')!.text = `$(pulse) ${usedMem.toFixed(2)}/${totalMem.toFixed(2)}GB`;
-        this.hBarItems.get('mem')!.tooltip = `Memory`;
+        this.hBarItems.get('mem')!.tooltip = memTooltip;
     }
 
     async uptimeItem(): Promise<void> {
-        const data = await systeminfo.time();
-        const uptime = data.uptime;
+        const timeData = await systeminfo.time();
+        let uptimeTooltip = new vscode.MarkdownString();
+        const uptime = timeData.uptime;
         const days = Math.floor(uptime / 86400).toString().padStart(2, '0');
         const hours = Math.floor((uptime % 86400) / 3600).toString().padStart(2, '0');
         const minutes = Math.floor(((uptime % 86400) % 3600) / 60).toString().padStart(2, '0');
         const seconds = Math.floor(((uptime % 86400) % 3600) % 60).toString().padStart(2, '0');
+        uptimeTooltip.appendMarkdown(`# Uptime Info\n`);
         this.hBarItems.get('uptime')!.text = `$(heart) ${days}:${hours}:${minutes}:${seconds}`;
-        this.hBarItems.get('uptime')!.tooltip = `Uptime`;
+        this.hBarItems.get('uptime')!.tooltip = uptimeTooltip;
     }
     
     async dockerItem(): Promise<void> {
-        const dockerImages = await systeminfo.dockerImages();
-        if (dockerImages.length === 0) {
+        const dockerImagesData = await systeminfo.dockerImages();
+        const dockerContainersData = await systeminfo.dockerContainers();
+        if (dockerImagesData.length === 0) {
             this.hBarItems.get('docker')!.hide();
             return;
         }
-        const dockerContainers = await systeminfo.dockerContainers();
-
         let dockerTooltip = new vscode.MarkdownString();
         dockerTooltip.appendMarkdown(`# Docker Info\n`);
-        
         // Docker images info
         dockerTooltip.appendMarkdown(`## Images\n`);
-        if (dockerImages.length === 0) {
+        if (dockerImagesData.length === 0) {
             dockerTooltip.appendMarkdown(`- No images\n`);
         } else {
-            dockerTooltip.appendMarkdown(`| Name | Image ID | Created | Size |\n`);
-            dockerTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- |\n`);
-            dockerImages.forEach((image) => {
-                const name = image.repoTags[0] === undefined ? image.repoDigests[0].split('@')[0] + ":\\<none\\>" : image.repoTags[0].split(':')[0];
-                dockerTooltip.appendMarkdown(`| ${name} | ${image.id.slice(7, 19)} | ${utils.formatTime(image.created)} | ${utils.formatBytes(image.size)} |\n`);
+            dockerTooltip.appendMarkdown(`| Name | Tag | Image ID | Created | Size |\n`);
+            dockerTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- | :--- |\n`);
+            dockerImagesData.forEach((image) => {
+                const name = image.repoTags[0] === undefined ? image.repoDigests[0].split('@')[0] : image.repoTags[0].split(':')[0];
+                const tag = image.repoTags[0] === undefined ? "\\<none\\>" : image.repoTags[0].split(':')[1];
+                dockerTooltip.appendMarkdown(`| ${name} | ${tag} | ${image.id.slice(7, 19)} | ${utils.formatTime(image.created)} | ${utils.formatBytes(image.size)} |\n`);
             });
         }
 
         // Docker containers info
         dockerTooltip.appendMarkdown(`## Containers\n`);
-        if (dockerContainers.length === 0) {
+        if (dockerContainersData.length === 0) {
             dockerTooltip.appendMarkdown(`- No running containers\n`);
         } else {
             dockerTooltip.appendMarkdown(`|Container ID | Image ID | Created | Name |\n`);
             dockerTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- |\n`);
-            dockerContainers.forEach((container) => {
+            dockerContainersData.forEach((container) => {
                 const name = container.name.slice(1);
                 dockerTooltip.appendMarkdown(`| ${container.id.slice(7, 19)} | ${container.imageID.slice(7, 19)} | ${utils.formatTime(container.created)} | ${container.name} |\n`);
             });
         }
 
-        this.hBarItems.get('docker')!.text = `$(package) ${dockerContainers.length} containers`;
+        this.hBarItems.get('docker')!.text = `$(package) ${dockerContainersData.length} containers`;
         this.hBarItems.get('docker')!.tooltip = dockerTooltip;
     }
 
