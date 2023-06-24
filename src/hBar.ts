@@ -15,6 +15,7 @@ class HBar {
     init() {
         this.hBarItems.set('cpu', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
         this.hBarItems.set('mem', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
+        this.hBarItems.set('gpu', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
         this.hBarItems.set('uptime', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
         this.hBarItems.set('user', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
         this.hBarItems.set('docker', vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
@@ -33,6 +34,7 @@ class HBar {
             this.userItem();
             this.dockerItem();
             this.netSpeedItem();
+            this.gpuItem();
         }, 500);
     }
 
@@ -83,7 +85,7 @@ class HBar {
         if (dockerImagesData.length === 0) {
             dockerTooltip.appendMarkdown(`- No images\n`);
         } else {
-            dockerTooltip.appendMarkdown(`| Name | Tag | Image ID | Created | Size |\n`);
+            dockerTooltip.appendMarkdown(`| Repository | Tag | Image ID | Created | Size |\n`);
             dockerTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- | :--- |\n`);
             dockerImagesData.forEach((image) => {
                 const name = image.repoTags[0] === undefined ? image.repoDigests[0].split('@')[0] : image.repoTags[0].split(':')[0];
@@ -164,6 +166,24 @@ class HBar {
         }
         this.hBarItems.get('net')!.text = `$(cloud-upload) ${utils.formatBytes(upSpeed)}/s  $(cloud-download) ${utils.formatBytes(downSpeed)}/s`;
         this.hBarItems.get('net')!.tooltip = netTooltip;
+    }
+
+    async gpuItem(): Promise<void> {
+        const gpuData = await systeminfo.graphics();
+        if (gpuData.controllers.length === 0) {
+            this.hBarItems.get('gpu')!.hide();
+            return;
+        }
+        let gpuTooltip = new vscode.MarkdownString();
+        gpuTooltip.appendMarkdown(`# GPU Info\n`);
+        gpuTooltip.appendMarkdown(`| Vendor | Model | VRAM |\n`);
+        gpuTooltip.appendMarkdown(`| :--- | :--- | :--- |\n`);
+        gpuData.controllers.forEach((gpu) => {
+            const vram = gpu.vram === null ? 'N/A' : (gpu.vram / 1024).toFixed(2) + 'GB';
+            gpuTooltip.appendMarkdown(`| ${gpu.vendor} | ${gpu.model} | ${vram} |\n`);
+        });
+        this.hBarItems.get('gpu')!.text = `$(server) ${gpuData.controllers.length} GPUs`;
+        this.hBarItems.get('gpu')!.tooltip = gpuTooltip;
     }
 }
 
