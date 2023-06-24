@@ -9,12 +9,26 @@ H-Bar means *Hydrogen-Bar*. A VSCode extension to show system HW/SW stats in sta
 
 ## Features
 
-- CPU usage rate
-- Memory usage
+- CPU
+  - Usage Rate
+  - Info
+- Memory
+  - Usage Size
+  - Total Size
+- GPU
+  - Count
+  - Info
 - Uptime
 - User
+  - Name
+  - TTY
+  - IP
 - Docker
-- Network speed
+  - Images Info
+  - Running Containers Info
+- Network
+  - Upload & Download Speed
+  - Network Interface Information
 
 ## Acknowledgements
 
