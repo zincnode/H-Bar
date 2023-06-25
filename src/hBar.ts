@@ -13,7 +13,7 @@ class HBar {
     }
 
     init() {
-        const modules = ['cpu', 'mem', 'gpu', 'uptime', 'user', 'docker', 'net'];
+        const modules = ['cpu', 'mem', 'gpu', 'uptime', 'docker', 'net'];
         modules.forEach((module) => {
             this.hBarItems.set(module, vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, -1));
             this.hBarItems.get(module)!.show();
@@ -26,7 +26,6 @@ class HBar {
             this.cpuItem();
             this.memItem();
             this.uptimeItem();
-            this.userItem();
             this.dockerItem();
             this.netSpeedItem();
             this.gpuItem();
@@ -34,8 +33,15 @@ class HBar {
     }
 
     async cpuItem(): Promise<void> {
-        const currentLoadData = await systeminfo.currentLoad();
-        const cpuData = await systeminfo.cpu();
+        let currentLoadData: systeminfo.Systeminformation.CurrentLoadData;
+        let cpuData: systeminfo.Systeminformation.CpuData;
+        try {
+            currentLoadData = await systeminfo.currentLoad();
+            cpuData = await systeminfo.cpu();
+        } catch (error) {
+            this.hBarItems.get('cpu')!.hide();
+            return;
+        }
         let cpuTooltip = new vscode.MarkdownString();
         cpuTooltip.appendMarkdown(`# CPU Info\n`);
         cpuTooltip.appendMarkdown(`- CPU: ${cpuData.manufacturer} ${cpuData.brand} ${cpuData.speed}GHz ${cpuData.physicalCores} Physical Cores ${cpuData.cores} Cores\n`);
@@ -44,7 +50,13 @@ class HBar {
     }
 
     async memItem(): Promise<void> {
-        const memData = await systeminfo.mem();
+        let memData : systeminfo.Systeminformation.MemData;
+        try {
+            memData = await systeminfo.mem();
+        } catch (error) {
+            this.hBarItems.get('mem')!.hide();
+            return;
+        }
         let memTooltip = new vscode.MarkdownString();
         const totalMem = memData.total / 1024 / 1024 / 1024;
         const usedMem = memData.active / 1024 / 1024 / 1024;
@@ -54,7 +66,13 @@ class HBar {
     }
 
     async uptimeItem(): Promise<void> {
-        const timeData = await systeminfo.time();
+        let timeData: systeminfo.Systeminformation.TimeData;
+        try {
+            timeData = systeminfo.time();
+        } catch (error) {
+            this.hBarItems.get('uptime')!.hide();
+            return;
+        }
         let uptimeTooltip = new vscode.MarkdownString();
         const uptime = timeData.uptime;
         const days = Math.floor(uptime / 86400).toString().padStart(2, '0');
@@ -67,8 +85,15 @@ class HBar {
     }
     
     async dockerItem(): Promise<void> {
-        const dockerImagesData = await systeminfo.dockerImages();
-        const dockerContainersData = await systeminfo.dockerContainers();
+        let dockerImagesData: systeminfo.Systeminformation.DockerImageData[];
+        let dockerContainersData: systeminfo.Systeminformation.DockerContainerData[];
+        try {
+            dockerImagesData = await systeminfo.dockerImages();
+            dockerContainersData = await systeminfo.dockerContainers();
+        } catch (error) {
+            this.hBarItems.get('docker')!.hide();
+            return;
+        }
         if (dockerImagesData.length === 0) {
             this.hBarItems.get('docker')!.hide();
             return;
@@ -106,48 +131,22 @@ class HBar {
         this.hBarItems.get('docker')!.tooltip = dockerTooltip;
     }
 
-    async userItem(): Promise<void> {
-        const users = await systeminfo.users();
-        users.sort((a, b) => {
-            if (a.user < b.user) {
-                return -1;
-            } else if (a.user > b.user) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-        let userTooltip = new vscode.MarkdownString();
-        userTooltip.appendMarkdown(`# User Info\n`);
-        userTooltip.appendMarkdown(`| User | TTY | IP | Count |\n`);
-        userTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- |\n`);
-        let lastUser = users[0].user;
-        let userCount = 0;
-        users.forEach((user) => {
-            if (user.user === lastUser) {
-                userCount++;
-            } else {
-                userTooltip.appendMarkdown(`| ${lastUser} | ${user.tty} | ${user.ip} | ${userCount} |\n`);
-                userCount = 1;
-                lastUser = user.user;
-            }
-        });
-        userTooltip.appendMarkdown(`| ${lastUser} | ${users[users.length - 1].tty} | ${users[users.length - 1].ip} | ${userCount} |\n`);
-        this.hBarItems.get('user')!.text = `$(account) ${users.length} users`;
-        this.hBarItems.get('user')!.tooltip = userTooltip;
-    }
-
     async netSpeedItem(): Promise<void> {
-        const netStats = await systeminfo.networkStats();
-        const netInterfaces = await systeminfo.networkInterfaces();
+        let netStats: systeminfo.Systeminformation.NetworkStatsData[];
+        let netInterfaces: systeminfo.Systeminformation.NetworkInterfacesData | systeminfo.Systeminformation.NetworkInterfacesData[];
+        try {
+            netStats = await systeminfo.networkStats();
+            netInterfaces = await systeminfo.networkInterfaces();
+        } catch (error) {
+            this.hBarItems.get('net')!.hide();
+            return;
+        }
         let upSpeed = 0;
         let downSpeed = 0;
         netStats.forEach((net) => {
             upSpeed += net.tx_sec;
             downSpeed += net.rx_sec;
-        }
-        );
-
+        });
         let netTooltip = new vscode.MarkdownString();
         netTooltip.appendMarkdown(`# Network Info\n`);
         netTooltip.appendMarkdown(`| Interface | IP | MAC |\n`);
@@ -157,14 +156,20 @@ class HBar {
                 netTooltip.appendMarkdown(`| ${net.iface} | ${net.ip4} | ${net.mac} |\n`);
             });
         } else {
-            netTooltip.appendMarkdown(`| ${netInterfaces.iface} | ${netInterfaces.ip4} | ${netInterfaces.mac} | ${utils.formatBytes(netStats.find((netStat) => netStat.iface === netInterfaces.iface)!.tx_sec)}/s | ${utils.formatBytes(netStats.find((netStat) => netStat.iface === netInterfaces.iface)!.rx_sec)}/s |\n`);
+            netTooltip.appendMarkdown(`| ${netInterfaces.iface} | ${netInterfaces.ip4} | ${netInterfaces.mac} |\n`);
         }
         this.hBarItems.get('net')!.text = `$(cloud-upload) ${utils.formatBytes(upSpeed)}/s  $(cloud-download) ${utils.formatBytes(downSpeed)}/s`;
         this.hBarItems.get('net')!.tooltip = netTooltip;
     }
 
     async gpuItem(): Promise<void> {
-        const gpuData = await systeminfo.graphics();
+        let gpuData: systeminfo.Systeminformation.GraphicsData;
+        try {
+            gpuData = await systeminfo.graphics();
+        } catch (error) {
+            this.hBarItems.get('gpu')!.hide();
+            return;
+        }
         if (gpuData.controllers.length === 0) {
             this.hBarItems.get('gpu')!.hide();
             return;
