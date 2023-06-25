@@ -105,12 +105,12 @@ class HBar {
         if (dockerImagesData.length === 0) {
             dockerTooltip.appendMarkdown(`- No images\n`);
         } else {
-            dockerTooltip.appendMarkdown(`| Repository | Tag | Image ID | Created | Size |\n`);
-            dockerTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- | :--- |\n`);
+            dockerTooltip.appendMarkdown(`| Repository | Tag | Image ID | Size |\n`);
+            dockerTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- |\n`);
             dockerImagesData.forEach((image) => {
                 const name = image.repoTags[0] === undefined ? image.repoDigests[0].split('@')[0] : image.repoTags[0].split(':')[0];
                 const tag = image.repoTags[0] === undefined ? "\\<none\\>" : image.repoTags[0].split(':')[1];
-                dockerTooltip.appendMarkdown(`| ${name} | ${tag} | ${image.id.slice(7, 19)} | ${utils.formatTime(image.created)} | ${utils.formatBytes(image.size)} |\n`);
+                dockerTooltip.appendMarkdown(`| ${name} | ${tag} | ${image.id.slice(7, 19)} | ${utils.formatBytes(image.size)} |\n`);
             });
         }
 
@@ -119,11 +119,11 @@ class HBar {
         if (dockerContainersData.length === 0) {
             dockerTooltip.appendMarkdown(`- No running containers\n`);
         } else {
-            dockerTooltip.appendMarkdown(`|Container ID | Image ID | Created | Name |\n`);
-            dockerTooltip.appendMarkdown(`| :--- | :--- | :--- | :--- |\n`);
+            dockerTooltip.appendMarkdown(`|Container ID | Image ID | Name |\n`);
+            dockerTooltip.appendMarkdown(`| :--- | :--- | :--- |\n`);
             dockerContainersData.forEach((container) => {
                 const name = container.name.slice(1);
-                dockerTooltip.appendMarkdown(`| ${container.id.slice(7, 19)} | ${container.imageID.slice(7, 19)} | ${utils.formatTime(container.created)} | ${container.name} |\n`);
+                dockerTooltip.appendMarkdown(`| ${container.id.slice(7, 19)} | ${container.imageID.slice(7, 19)} | ${container.name} |\n`);
             });
         }
 
