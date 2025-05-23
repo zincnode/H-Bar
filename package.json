@@ -1,31 +1,163 @@
 {
   "name": "h-bar",
   "displayName": "H-Bar",
-  "description": "A status bar to show system HW/SW stats",
-  "version": "0.0.10",
+  "description": "Real-time system monitoring in VS Code status bar - CPU, Memory, GPU, Network, Docker containers, and uptime display",
+  "version": "0.0.12",
   "engines": {
-    "vscode": "^1.79.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Other"
   ],
   "keywords": [
-    "system status",
+    "system monitor",
     "status bar",
-    "cpu load",
-    "memory usage",
-    "uptime",
-    "docker",
-    "monitor"
+    "performance"
   ],
   "activationEvents": [
     "onStartupFinished"
   ],
   "icon": "images/icon-hydrogen.png",
-  "repository": "git@github.com:zincnode/H-Bar.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zincnode/H-Bar.git"
+  },
   "publisher": "zincnode",
   "main": "./out/extension.js",
-  "contributes": {},
+  "contributes": {
+    "configuration": {
+      "title": "H-Bar System Monitor",
+      "properties": {
+        "hbar.updateInterval": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 500,
+          "maximum": 10000,
+          "description": "Update interval in milliseconds (500-10000ms)"
+        },
+        "hbar.cacheTTL": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 1000,
+          "maximum": 30000,
+          "description": "Cache TTL in milliseconds (1000-30000ms)"
+        },
+        "hbar.modules.cpu": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show CPU usage in status bar"
+        },
+        "hbar.modules.memory": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show memory usage in status bar"
+        },
+        "hbar.modules.gpu": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show GPU information in status bar"
+        },
+        "hbar.modules.uptime": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show system uptime in status bar"
+        },
+        "hbar.modules.docker": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Docker containers in status bar"
+        },
+        "hbar.modules.network": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show network speed in status bar"
+        },
+        "hbar.display.moduleOrder": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "cpu",
+              "memory",
+              "gpu",
+              "uptime",
+              "docker",
+              "network"
+            ]
+          },
+          "default": [
+            "cpu",
+            "memory",
+            "gpu",
+            "uptime",
+            "docker",
+            "network"
+          ],
+          "description": "Order of modules in status bar"
+        },
+        "hbar.display.decimalPlaces": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Number of decimal places for numeric values"
+        },
+        "hbar.display.memoryUnit": {
+          "type": "string",
+          "enum": [
+            "GB",
+            "MB",
+            "auto"
+          ],
+          "default": "auto",
+          "description": "Memory display unit (GB, MB, or auto)"
+        },
+        "hbar.display.compactMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use compact display with minimal text"
+        },
+        "hbar.display.showIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show icons in status bar items"
+        },
+        "hbar.display.alignment": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "default": "left",
+          "description": "Status bar alignment"
+        },
+        "hbar.thresholds.cpuWarning": {
+          "type": "number",
+          "default": 80,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "CPU usage warning threshold (%)"
+        },
+        "hbar.thresholds.memoryWarning": {
+          "type": "number",
+          "default": 90,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Memory usage warning threshold (%)"
+        },
+        "hbar.colors.enableWarningColors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable warning colors when thresholds are exceeded"
+        },
+        "hbar.position.priority": {
+          "type": "number",
+          "default": 100,
+          "description": "Status bar item priority (higher = more left)"
+        }
+      }
+    }
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -36,18 +168,18 @@
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "20.2.5",
-    "@types/vscode": "^1.79.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.8",
-    "@typescript-eslint/parser": "^5.59.8",
-    "@vscode/test-electron": "^2.3.2",
-    "eslint": "^8.41.0",
-    "glob": "^8.1.0",
-    "mocha": "^10.2.0",
-    "typescript": "^5.1.3"
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "@vscode/test-electron": "^2.4.0",
+    "eslint": "^8.57.0",
+    "glob": "^10.4.0",
+    "mocha": "^10.4.0",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
-    "systeminformation": "^5.18.3"
+    "systeminformation": "^5.22.7"
   }
 }
