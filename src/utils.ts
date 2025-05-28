@@ -23,31 +23,6 @@ export function formatBytes(bytes: number, decimals = 1): string {
     return parseFloat((bytes / Math.pow(k, sizeIndex)).toFixed(dm)) + ' ' + sizes[sizeIndex];
 }
 
-/**
- * Format Unix timestamp to readable date string
- * @param unixTime - Unix timestamp
- * @returns Formatted string like "2024-05-23 14:30:25"
- */
-export function formatTime(unixTime: number): string {
-    if (!Number.isFinite(unixTime)) {
-        return 'Invalid Date';
-    }
-
-    const date = new Date(unixTime * 1000);
-
-    if (isNaN(date.getTime())) {
-        return 'Invalid Date';
-    }
-
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const hour = date.getHours().toString().padStart(2, '0');
-    const minute = date.getMinutes().toString().padStart(2, '0');
-    const second = date.getSeconds().toString().padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-}
 
 /**
  * Initialize systeminformation library for the current platform
