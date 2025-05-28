@@ -2,7 +2,7 @@
   "name": "h-bar",
   "displayName": "H-Bar",
   "description": "Real-time system monitoring in VS Code status bar - CPU, Memory, GPU, Network, Docker containers, and uptime display",
-  "version": "0.0.13",
+  "version": "0.0.12",
   "engines": {
     "vscode": "^1.90.0"
   },
