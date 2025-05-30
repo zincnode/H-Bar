@@ -17,8 +17,8 @@ export class UptimeModule extends BaseModule {
         const { days, hours, minutes, seconds } = this.parseUptime(uptime);
 
         const tooltip = new vscode.MarkdownString();
-        tooltip.appendMarkdown(`## ⏰ System Uptime\n\n`);
-        tooltip.appendMarkdown(`**Total Uptime:** \`${days}d ${hours}h ${minutes}m ${seconds}s\`\n\n`);
+        tooltip.appendMarkdown(`## System Uptime\n\n`);
+        tooltip.appendMarkdown(`**Uptime:** \`${days}d ${hours}h ${minutes}m ${seconds}s\`\n\n`);
 
         const iconText = this.displayConfig.showIcons ? '$(clock) ' : '';
         const displayTime = this.displayConfig.compactMode

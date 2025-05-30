@@ -22,7 +22,7 @@ export class MemoryModule extends BaseModule {
         const totalFormatted = this.formatMemory(totalMem);
 
         const tooltip = new vscode.MarkdownString();
-        tooltip.appendMarkdown(`## 💾 Memory Information\n\n`);
+        tooltip.appendMarkdown(`## Memory Information\n\n`);
         tooltip.appendMarkdown(`**Usage Overview:**\n`);
         tooltip.appendMarkdown(`• **Used:** ${usedFormatted}\n`);
         tooltip.appendMarkdown(`• **Total:** ${totalFormatted}\n`);

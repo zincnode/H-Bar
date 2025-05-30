@@ -18,14 +18,14 @@ export class CpuModule extends BaseModule {
         const isWarning = usage > this.thresholdConfig.cpuWarning;
 
         const tooltip = new vscode.MarkdownString();
-        tooltip.appendMarkdown(`## 🔧 CPU Information\n\n`);
+        tooltip.appendMarkdown(`## CPU Information\n\n`);
         tooltip.appendMarkdown(`**Processor:** ${cpu?.manufacturer || 'Unknown'} ${cpu?.brand || 'Unknown'}\n\n`);
         tooltip.appendMarkdown(`**Specifications:**\n`);
         tooltip.appendMarkdown(`• **Base Speed:** ${cpu?.speed || 'Unknown'} GHz\n`);
         tooltip.appendMarkdown(`• **Physical Cores:** ${cpu?.physicalCores || 'Unknown'}\n`);
         tooltip.appendMarkdown(`• **Logical Cores:** ${cpu?.cores || 'Unknown'}\n\n`);
 
-        const iconText = this.displayConfig.showIcons ? '$(dashboard) ' : '';
+        const iconText = this.displayConfig.showIcons ? '$(chip) ' : '';
         this.statusBarItem.text = `${iconText}${usage.toFixed(this.displayConfig.decimalPlaces)}%`;
         this.statusBarItem.tooltip = tooltip;
 

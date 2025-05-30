@@ -8,7 +8,7 @@ export class DockerModule extends BaseModule {
     }
 
     update(dockerData: SystemData['docker']): void {
-        const iconText = this.displayConfig.showIcons ? '$(vm) ' : '';
+        const iconText = this.displayConfig.showIcons ? '$(package) ' : '';
 
         if (!dockerData || !Array.isArray(dockerData.containers)) {
             this.statusBarItem.text = `${iconText}N/A`;
@@ -22,26 +22,20 @@ export class DockerModule extends BaseModule {
         }
 
         const { containers } = dockerData;
-        const tooltip = new vscode.MarkdownString();
-        tooltip.appendMarkdown(`## 🐳 Docker Containers\n\n`);
+        const runningContainers = containers.filter(c => c.state === 'running');
 
-        if (containers.length === 0) {
-            tooltip.appendMarkdown(`📦 **No containers found**\n\n`);
+        const tooltip = new vscode.MarkdownString();
+        tooltip.appendMarkdown(`## Docker Containers\n\n`);
+
+        if (runningContainers.length === 0) {
+            tooltip.appendMarkdown(`📦 **No running containers found**\n\n`);
             tooltip.appendMarkdown(`*Start a container to see it here*\n`);
             this.statusBarItem.text = `${iconText}0`;
         } else {
-            const runningCount = containers.filter(c => c.state === 'running').length;
-            const stoppedCount = containers.length - runningCount;
+            tooltip.appendMarkdown(`**Running Containers:** ${runningContainers.length}\n\n`);
 
-            tooltip.appendMarkdown(`**Summary:** ${containers.length} total containers\n`);
-            tooltip.appendMarkdown(`• 🟢 **Running:** ${runningCount}\n`);
-            if (stoppedCount > 0) {
-                tooltip.appendMarkdown(`• 🔴 **Stopped:** ${stoppedCount}\n`);
-            }
-            tooltip.appendMarkdown(`\n`);
-
-            this.appendContainerDetails(tooltip, containers);
-            this.statusBarItem.text = `${iconText}${containers.length}`;
+            this.appendContainerDetails(tooltip, runningContainers);
+            this.statusBarItem.text = `${iconText}${runningContainers.length}`;
         }
 
         this.statusBarItem.tooltip = tooltip;
@@ -49,19 +43,17 @@ export class DockerModule extends BaseModule {
     }
 
     private appendContainerDetails(tooltip: vscode.MarkdownString, containers: any[]): void {
-        const maxShow = 5;
+        const maxShow = 10;
         const containersToShow = containers.slice(0, maxShow);
 
         if (containersToShow.length > 0) {
             tooltip.appendMarkdown(`**Container Details:**\n\n`);
             containersToShow.forEach((container) => {
-                const statusIcon = container.state === 'running' ? '🟢' : '🔴';
-                const status = container.state?.charAt(0).toUpperCase() + container.state?.slice(1) || 'Unknown';
-                tooltip.appendMarkdown(`${statusIcon} **${container.name || 'Unknown'}** - \`${status}\`\n`);
+                tooltip.appendMarkdown(`🟢 **${container.name || 'Unknown'}** - \`Running\`\n\n`);
             });
 
             if (containers.length > maxShow) {
-                tooltip.appendMarkdown(`\n*...and ${containers.length - maxShow} more containers*\n`);
+                tooltip.appendMarkdown(`\n*...and ${containers.length - maxShow} more running containers*\n`);
             }
         }
     }

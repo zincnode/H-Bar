@@ -15,7 +15,7 @@ export class GpuModule extends BaseModule {
 
         const { controllers } = gpuData;
         const tooltip = new vscode.MarkdownString();
-        tooltip.appendMarkdown(`## 🚀 GPU Information\n\n`);
+        tooltip.appendMarkdown(`## GPU Information\n\n`);
         tooltip.appendMarkdown(`**Detected GPUs:** ${controllers.length}\n\n`);
 
         controllers.forEach((gpu: any, index: number) => {

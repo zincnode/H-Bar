@@ -19,7 +19,7 @@ export class NetworkModule extends BaseModule {
         const totalDown = stats.reduce((sum, net) => sum + this.safeNumber(net.rx_sec, 0), 0);
 
         const tooltip = new vscode.MarkdownString();
-        tooltip.appendMarkdown(`## 🌐 Network Information\n\n`);
+        tooltip.appendMarkdown(`## Network Information\n\n`);
         this.appendInterfaceDetails(tooltip, interfaces);
 
         const upIcon = this.displayConfig.showIcons ? '$(arrow-up) ' : '↑';
